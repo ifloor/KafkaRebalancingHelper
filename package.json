@@ -1,0 +1,35 @@
+{
+  "name": "kafka-rebalancing-helper",
+  "version": "0.1.0",
+  "description": "Tool to help on managing kafka partitions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "local": "nodemon --watch \"src/\" --exec \"ts-node src/index.ts\" -e ts",
+    "cp-kafka-bin": "ncp kafka-bin dist/kafka",
+    "build": "rimraf dist && tsc && npm run cp-kafka-bin",
+    "prod": "cd dist && node --trace-warnings index.js",
+    "buildAndProd": "npm run build && ncp envs/.env dist/.env && npm run prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com:ifloor/KafkaRebalancingHelper.git"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "author": "Igor Floor",
+  "license": "ISC",
+  "homepage": "https://github.com/ifloor/KafkaRebalancingHelper",
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "ncp": "^2.0.0",
+    "rimraf": "^3.0.2",
+    "tslint": "^5.12.1",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "guid-typescript": "^1.0.9"
+  }
+}

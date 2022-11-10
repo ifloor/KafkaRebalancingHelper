@@ -1,0 +1,36 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "member-ordering": [
+            true,
+            {
+                "order": [
+                    "private-static-field",
+                    "private-instance-field",
+                    "private-constructor",
+
+                    "public-static-field",
+                    "public-static-method",
+                    "public-instance-field",
+                    "public-constructor",
+                    "public-instance-method",
+
+                    "protected-static-field",
+                    "protected-static-method",
+                    "protected-instance-field",
+                    "protected-constructor",
+                    "protected-instance-method",
+
+
+                    "private-static-method",
+                    "private-instance-method"
+                ]
+            }
+        ]
+    },
+    "rulesDirectory": []
+}
