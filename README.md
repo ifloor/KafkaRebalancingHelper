@@ -1,3 +1,5 @@
+Repo: https://github.com/ifloor/KafkaRebalancingHelper
+
 Application to help manage topic partitions of some kafka brokers
 
 # Environment variables to run:
