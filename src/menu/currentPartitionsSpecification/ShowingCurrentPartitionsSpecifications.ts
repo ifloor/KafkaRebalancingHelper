@@ -55,7 +55,7 @@ export class ShowingCurrentPartitionsSpecification {
     private static async option2() {
         const topics = await ExecDescribeAllPartition.exec();
         topics.forEach(topic => {
-            console.log(`Topic: ${topic.getName()}`);
+            console.log(`Topic: ${topic.getName()},\treplicationFactor: ${topic.getReplicationFactor()},\tconfigs: ${topic.getConfigs()}`);
             topic.getPartitions().forEach(partition => {
                 console.log(`\tpartition: ${partition.getPartitionNumber()},\tleader: ${partition.getBrokerLeader()}` +
                 `,\treplicas: ${partition.getReplicasStatus()},\tisr: ${partition.getInSyncReplicasStatus()}`)

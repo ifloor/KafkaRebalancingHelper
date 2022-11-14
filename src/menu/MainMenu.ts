@@ -4,6 +4,7 @@ import {
     ShowingCurrentPartitionsSpecification
 } from "./currentPartitionsSpecification/ShowingCurrentPartitionsSpecifications";
 import {ShowingByBrokerPartitionsDetails} from "./byBroker/ShowingByBrokerPartitionsDetails";
+import {ReassignMenu} from "./reassign/ReassignMenu";
 
 export class MainMenu {
 
@@ -24,8 +25,10 @@ export class MainMenu {
 
     private static printMenu(): void {
         console.log(`1) Show current partitions specification`);
-        console.log(`2) Show live partitions statistics`);
+        console.log(`2*) Show live partitions statistics`);
         console.log(`3) Show brokers with partitions`);
+        console.log(`4) Move (reassign) partitions`);
+        console.log(`5*) Change topic configs`);
         console.log(`9) Exit`);
     }
 
@@ -42,6 +45,11 @@ export class MainMenu {
             case "3":
                 console.log("option 3");
                 ShowingByBrokerPartitionsDetails.run();
+                break;
+
+            case "4":
+                console.log("option 4");
+                ReassignMenu.run();
                 break;
 
             case "9":

@@ -7,7 +7,6 @@ export class KafkaPartition {
     private replicasStatus: string = "";
     private inSyncReplicasStatus: string = "";
 
-
     constructor() {}
 
     public getTopic(): KafkaTopic {
