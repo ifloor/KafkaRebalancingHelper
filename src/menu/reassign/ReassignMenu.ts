@@ -4,6 +4,7 @@ import {Reassigner} from "../../reassign/Reassigner";
 import {BrokerWeightSelectionMenu} from "./BrokerWeightSelectionMenu";
 import {BrokerWeightSpecification} from "../../reassign/BrokerWeightSpecification";
 import {MainMenu} from "../MainMenu";
+import {ReplicaConfigurationMenu} from "./ReplicaConfigurationMenu";
 
 export class ReassignMenu {
     public static run() {
@@ -23,6 +24,7 @@ export class ReassignMenu {
     private static printMenu(): void {
         console.log(`1) Move partitions between brokers evenly (all with same weight)`);
         console.log(`2) Move partitions between brokers using different weights for each broker`);
+        console.log(`3) Set replicas for a partition manually (be careful, you should know what you are doing)`);
         console.log(`9) Go back`);
     }
 
@@ -31,8 +33,13 @@ export class ReassignMenu {
             case "1":
                 const _ = this.option1();
                 break;
+
             case "2":
                 this.option2();
+                break;
+
+            case "3":
+                this.option3();
                 break;
 
             case "9":
@@ -73,5 +80,9 @@ export class ReassignMenu {
         }).catch((error: any) => {
             console.log(`Error when executing execListAllBrokers: ${JSON.stringify(error)}`);
         });
+    }
+
+    private static option3() {
+        new ReplicaConfigurationMenu().run();
     }
 }

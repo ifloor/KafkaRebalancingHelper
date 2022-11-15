@@ -6,7 +6,7 @@ export class CommandRunner {
     private static readonly MAX_BUFFER = 5 * 1024 * 1024; // 5mb
     public static execute(command: string): Promise<string> {
         return new Promise((resolve, reject) => {
-            Logger.info(`Running command: ${command}`);
+            Logger.debug(`Running command: ${command}`);
 
             try {
                 const childExec = exec(command, {maxBuffer: CommandRunner.MAX_BUFFER}, (error, stdout, stderr) => {

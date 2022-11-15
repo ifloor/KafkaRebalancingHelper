@@ -3,7 +3,7 @@ import {KafkaPartition} from "../../kafka/model/KafkaPartition";
 export class ReassigningPartition {
     private readonly topic: string;
     private readonly partition: number;
-    private readonly replicas: number[];
+    private replicas: number[];
     private changed: boolean;
 
     constructor(existingPartition: KafkaPartition) {
@@ -52,6 +52,11 @@ export class ReassigningPartition {
 
     public getReplicas(): number[] {
         return this.replicas;
+    }
+
+    public setReplicas(replicas: number[]): void {
+        this.replicas = replicas;
+        this.changed =  true;
     }
 
     public getChanged(): boolean {

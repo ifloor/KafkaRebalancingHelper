@@ -5,6 +5,7 @@ import {
 } from "./currentPartitionsSpecification/ShowingCurrentPartitionsSpecifications";
 import {ShowingByBrokerPartitionsDetails} from "./byBroker/ShowingByBrokerPartitionsDetails";
 import {ReassignMenu} from "./reassign/ReassignMenu";
+import {ShowingCurrentConsumerGroups} from "./currentConsumerGroups/ShowingCurrentConsumerGroups";
 
 export class MainMenu {
 
@@ -18,28 +19,28 @@ export class MainMenu {
 
 
         this.printMenu();
-        readline.question("", (input: string) => {
-            this.typed(input);
+        readline.question("", async (input: string) => {
+            await this.typed(input);
         });
     }
 
     private static printMenu(): void {
         console.log(`1) Show current partitions specification`);
-        console.log(`2*) Show live partitions statistics`);
+        console.log(`2) Show current consumer groups details`);
         console.log(`3) Show brokers with partitions`);
         console.log(`4) Move (reassign) partitions`);
         console.log(`5*) Change topic configs`);
         console.log(`9) Exit`);
     }
 
-    private static typed(line: string): void {
+    private static async typed(line: string): Promise<void> {
         switch (line.toLowerCase().trim()) {
             case "1":
                 ShowingCurrentPartitionsSpecification.run();
                 break;
             case "2":
                 console.log("option 2");
-                this.menuEntry()
+                ShowingCurrentConsumerGroups.run();
                 break;
 
             case "3":
@@ -62,5 +63,4 @@ export class MainMenu {
                 this.menuEntry();
         }
     }
-
 }

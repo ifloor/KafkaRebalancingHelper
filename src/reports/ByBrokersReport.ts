@@ -11,7 +11,6 @@ export class ByBrokersReport {
         this._offlinePartitions = offlinePartitions;
     }
 
-
     get brokerReports(): BrokerWithSimplifiedInfo[] {
         return this._brokerReports;
     }

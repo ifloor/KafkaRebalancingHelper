@@ -14,6 +14,10 @@ export class ReassigningDocument {
         this.partitions.push(new ReassigningPartition(existingPartition));
     }
 
+    public addReassigningPartition(existingPartition: ReassigningPartition): void {
+        this.partitions.push(existingPartition);
+    }
+
     public getPartitions(): ReassigningPartition[] {
         return this.partitions;
     }

@@ -1,6 +1,6 @@
 {
   "name": "kafka-rebalancing-helper",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "description": "Tool to help on managing kafka partitions",
   "main": "index.js",
   "scripts": {
