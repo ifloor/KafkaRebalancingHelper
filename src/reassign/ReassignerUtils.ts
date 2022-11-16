@@ -2,6 +2,7 @@ import {ReassigningDocument} from "./model/ReassigningDocument";
 import {KafkaTopic} from "../kafka/model/KafkaTopic";
 import {RandomUtils} from "../utils/RandomUtils";
 import {Logger} from "../utils/Logger";
+import {ReassigningPartition} from "./model/ReassigningPartition";
 
 export class ReassignerUtils {
     public static mapExisting(topics: KafkaTopic[]): Map<string, ReassigningDocument> {
@@ -50,6 +51,32 @@ export class ReassignerUtils {
             Logger.error(`Cannot move leadership from ${fromBrokerID} to ${toBrokerID}. Impossible to continue`);
             process.exit(-1);
         }
+    }
+
+    public static canMoveReplicaToAnotherBroker(fromBrokerID: string, toBrokerID: string, documents: Map<string, ReassigningDocument>): ReassigningPartition | null {
+        const fromID: number = Number.parseInt(fromBrokerID);
+        const toID: number = Number.parseInt(toBrokerID);
+        let foundPartition: ReassigningPartition | null = null;
+
+        for (let document of documents.values()) {
+            if (foundPartition != null) break;
+
+            for (let partition of document.getPartitions()) {
+                if (partition.getReplicas().indexOf(fromID) >= 0 && partition.getReplicas().indexOf(toID) < 0) {
+                    foundPartition = partition;
+                    break;
+                }
+            }
+        }
+
+        return foundPartition;
+    }
+
+    public static moveReplica(fromBrokerID: string, toBrokerID: string, partitionToMove: ReassigningPartition): void {
+        const fromID: number = Number.parseInt(fromBrokerID);
+        const toID: number = Number.parseInt(toBrokerID);
+        const replicas = partitionToMove.getReplicas();
+        replicas[replicas.indexOf(fromID)] = toID;
     }
 
     public static countTopicsToReassign(documents: Map<string, ReassigningDocument>): number {

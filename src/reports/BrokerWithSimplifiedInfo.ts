@@ -7,7 +7,15 @@ export class BrokerWithSimplifiedInfo {
     private readonly responsibleForPartitionReplicasCount: number; // Is responsible for replica partitions
     private readonly isInSyncPartitionReplicasCount: number; // Is responsible for replica partitions
 
-    constructor(id: string, isPreferredLeaderCount: number, isNotPreferredLeaderCount: number, servingNotPreferredPartitionsCount: number, shouldBeTheLeaderPartitionsCount: number, responsibleForPartitionReplicasCount: number, isInSyncPartitionReplicasCount: number) {
+    constructor(
+        id: string,
+        isPreferredLeaderCount: number,
+        isNotPreferredLeaderCount: number,
+        servingNotPreferredPartitionsCount: number,
+        shouldBeTheLeaderPartitionsCount: number,
+        responsibleForPartitionReplicasCount: number,
+        isInSyncPartitionReplicasCount: number
+    ) {
         this.id = id;
         this.isPreferredLeaderCount = isPreferredLeaderCount;
         this.isNotPreferredLeaderCount = isNotPreferredLeaderCount;

@@ -1,30 +1,10 @@
-import {KafkaTopic} from "../kafka/model/KafkaTopic";
 import {ReassigningDocument} from "./model/ReassigningDocument";
-import {KafkaPartition} from "../kafka/model/KafkaPartition";
 import {Logger} from "../utils/Logger";
 import {ReassignerUtils} from "./ReassignerUtils";
+import {RandomUtils} from "../utils/RandomUtils";
+import {ReassigningPartition} from "./model/ReassigningPartition";
 
 export class ReassignerReplicas {
-    public static async reassignReplicas(topics: KafkaTopic[], idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
-        const brokersLeading: Map<string, KafkaPartition[]> = new Map();
-
-        /*topics.forEach(topic => {
-            topic.getPartitions().forEach(partition => {
-                const replicas = partition.getReplicasStatus().split(",");
-                const idealLeader = replicas[0];
-                this.addToMap(brokersLeading, idealLeader, partition);
-            });
-        });*/
-
-        for (let brokerToFix of idealNumbers.keys()) {
-            await this.checkBalancingReplicas(brokerToFix, idealNumbers, partitionDocuments);
-        }
-    }
-
-    private static async checkReplicationFactor(brokerIDToCheck: string, idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
-
-    }
-
     private static async checkBalancingReplicas(brokerIDToCheck: string, idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
         const idealReplicas = idealNumbers.get(brokerIDToCheck);
         if (! idealReplicas) {
@@ -32,28 +12,72 @@ export class ReassignerReplicas {
             return;
         }
 
-        /*let brokerPartitions = this.countPartitionsThatBrokerIsLeader(brokerIDToCheck, partitionDocuments);
-        while (idealReplicas < brokerPartitions) { // Reduce this broker number of leadership
+        let brokerReplications = this.countPartitionsThatBrokerReplicates(brokerIDToCheck, partitionDocuments);
+        while (brokerReplications > idealReplicas) { // Reduce this broker replications
             // move
             const otherBrokerTries = this.buildOtherBrokersTries(idealNumbers, brokerIDToCheck);
             let otherBrokerToMoveTo: string | null = null;
-            while (otherBrokerToMoveTo === null) {
+            let partitionToMove: ReassigningPartition | null = null;
+            while (partitionToMove === null) {
                 const otherRandomBroker = this.randomlyChooseAndCutNextBroker(otherBrokerTries);
                 if (otherRandomBroker === null) {
-                    Logger.error(`Impossible to find another broker to move the partition leadership to. Exiting...`);
+                    Logger.error(`Impossible to find another broker to move the partition replica to. Exiting...`);
                     process.exit(-1);
                 }
 
-                const otherBrokerLeaderIdealPartitionsNumber = idealNumbers.get(otherRandomBroker!) ?? Number.MAX_SAFE_INTEGER;
-                const otherBrokerRealPartitions = this.countPartitionsThatBrokerIsLeader(otherRandomBroker!, partitionDocuments);
-                if (otherBrokerRealPartitions < otherBrokerLeaderIdealPartitionsNumber) {
-                    otherBrokerToMoveTo = otherRandomBroker;
+                const otherBrokerReplicasIdealNumber = idealNumbers.get(otherRandomBroker!) ?? Number.MAX_SAFE_INTEGER;
+                const otherBrokerRealReplicasNumber = this.countPartitionsThatBrokerReplicates(otherRandomBroker!, partitionDocuments);
+                if (otherBrokerReplicasIdealNumber > otherBrokerRealReplicasNumber) { // Has fewer replicas than ideal
+                    const possiblePartitionToMove = ReassignerUtils.canMoveReplicaToAnotherBroker(brokerIDToCheck, otherRandomBroker, partitionDocuments);
+                    if (possiblePartitionToMove !== null) {
+                        partitionToMove = possiblePartitionToMove;
+                        otherBrokerToMoveTo = otherRandomBroker;
+                    }
                 }
             }
 
-            Logger.debug(`Found that I should move a partition leadership from me (broker:${brokerIDToCheck}) to broker: ${otherBrokerToMoveTo}`);
-            ReassignerUtils.moveLeadership(brokerIDToCheck, otherBrokerToMoveTo, partitionDocuments);
-            brokerPartitions = this.countPartitionsThatBrokerIsLeader(brokerIDToCheck, partitionDocuments); // re-count
-        }*/
+            if (otherBrokerToMoveTo === null || partitionToMove === null) {
+                Logger.error(`Impossible to find another partition to move replica.`);
+                process.exit(-1);
+            }
+
+            Logger.debug(`Found that I should move a partition replica from me (broker:${brokerIDToCheck}) to broker: ${otherBrokerToMoveTo}, partition: ${partitionToMove.getTopic()}:${partitionToMove.getPartition()}`);
+            ReassignerUtils.moveReplica(brokerIDToCheck, otherBrokerToMoveTo, partitionToMove);
+            brokerReplications = this.countPartitionsThatBrokerReplicates(brokerIDToCheck, partitionDocuments); // re-count
+        }
+    }
+
+    private static countPartitionsThatBrokerReplicates(broker: string, partitionDocuments: Map<string, ReassigningDocument>): number {
+        const brokerAsNumber = Number.parseInt(broker);
+        let totalReplications = 0;
+        partitionDocuments.forEach(partitionDocument => {
+            partitionDocument.getPartitions().forEach((reassigningPartition, index) => {
+                if (reassigningPartition.getReplicas().indexOf(brokerAsNumber) >= 0) totalReplications += 1;
+            });
+        });
+
+        return totalReplications;
+    }
+
+    private static buildOtherBrokersTries(idealNumbers: Map<string, number>, thisBrokerID: string): Set<string> {
+        const allOtherBrokers: Set<string> = new Set<string>();
+        idealNumbers.forEach((value, brokerID) => {
+            if (brokerID !== thisBrokerID) {
+                allOtherBrokers.add(brokerID);
+            }
+        });
+
+        return allOtherBrokers;
+    }
+
+    private static randomlyChooseAndCutNextBroker(otherBrokersTries: Set<string>): string | null {
+        let selectedIndex = -1;
+        for (let i = 0; i < 30; i++) {
+            selectedIndex = RandomUtils.getRandomInt(0, otherBrokersTries.size - 1);
+        }
+
+        const otherRandomBroker =  Array.from(otherBrokersTries.values())[selectedIndex]; // the other random broker ;);
+        otherBrokersTries.delete(otherRandomBroker);
+        return otherRandomBroker;
     }
 }

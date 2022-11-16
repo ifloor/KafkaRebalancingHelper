@@ -35,10 +35,7 @@ export class Reassigner {
         brokerReports.brokerReports.forEach(brokerReport => {
             brokerLeaderMap.set(brokerReport.getId(), brokerReport.getShouldBeTheLeaderPartitionsCount());
             brokerReplicaMap.set(brokerReport.getId(), brokerReport.getResponsibleForPartitionReplicasCount());
-        });
-
-        topics.forEach((topic) => {
-            totalReplicas += topic.getReplicationFactor() * topic.getPartitions().length;
+            totalReplicas += brokerReport.getResponsibleForPartitionReplicasCount();
         });
 
         // Leader
@@ -64,7 +61,7 @@ export class Reassigner {
     private static logProportionFound(proportionFound: Map<string, number>, brokerRealInfoMap: Map<string, number>, context: string, objectName: string): void {
         Logger.info(`When looking for ${context}, calculated the following proportion for the brokers:`);
         proportionFound.forEach((number, brokerID) => {
-            Logger.info(`Broker[${brokerID}] ${objectName}: estimated=[${number}], current=[${brokerRealInfoMap.get(brokerID)}]`);
+            Logger.info(`Broker[${brokerID}] ${objectName}: estimated=[${number}], current=[${brokerRealInfoMap.get(brokerID) ?? 0}]`);
         });
     }
 }

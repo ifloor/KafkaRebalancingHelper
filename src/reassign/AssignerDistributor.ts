@@ -25,8 +25,8 @@ export class AssignerDistributor {
         });
 
         while (totalLeaders < numberToDivide) {
-            // Add 1 to a random broker
-            const brokerIDs: string[] = Array.from(idealNumbers.keys());
+            // Add 1 to a random broker (among the fewest numbers)
+            const brokerIDs: string[] = this.getOnlyBrokersWithFewestNumbers(idealNumbers);
             const brokerToAddIndex = RandomUtils.getRandomInt(0, brokerIDs.length - 1);
             Logger.debug(`RandomIndex to increase proportion: ${brokerToAddIndex}`);
             const brokerToAddID = brokerIDs[brokerToAddIndex];
@@ -39,5 +39,22 @@ export class AssignerDistributor {
         }
 
         return idealNumbers;
+    }
+
+    private static getOnlyBrokersWithFewestNumbers(numbers: Map<string, number>): string[] {
+        let brokersToConsider: string[] = [];
+        let fewestNumberFound = Number.MAX_SAFE_INTEGER;
+        numbers.forEach((idealNumber, brokerID) => {
+           if (fewestNumberFound > idealNumber) {
+               fewestNumberFound = idealNumber;
+               brokersToConsider = [];
+           }
+
+           if (idealNumber <= fewestNumberFound) {
+               brokersToConsider.push(brokerID);
+           }
+        });
+
+        return brokersToConsider;
     }
 }

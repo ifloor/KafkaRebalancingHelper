@@ -30,7 +30,7 @@ export class ReassignerLeadership {
         }
 
         let brokerPartitions = this.countPartitionsThatBrokerIsLeader(brokerIDToCheck, partitionDocuments);
-        while (idealLeadershipPartitions < brokerPartitions) { // Reduce this broker number of leadership
+        while (brokerPartitions > idealLeadershipPartitions) { // Reduce this broker number of leadership
             // move
             const otherBrokerTries = this.buildOtherBrokersTries(idealNumbers, brokerIDToCheck);
             let otherBrokerToMoveTo: string | null = null;
