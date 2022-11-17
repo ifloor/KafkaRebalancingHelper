@@ -45,6 +45,8 @@ export class AssignerDistributor {
         let brokersToConsider: string[] = [];
         let fewestNumberFound = Number.MAX_SAFE_INTEGER;
         numbers.forEach((idealNumber, brokerID) => {
+            if (idealNumber === 0) return;
+
            if (fewestNumberFound > idealNumber) {
                fewestNumberFound = idealNumber;
                brokersToConsider = [];
