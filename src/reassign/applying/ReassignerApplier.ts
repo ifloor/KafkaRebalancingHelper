@@ -8,6 +8,10 @@ import * as fs from "fs";
 
 export class ReassignerApplier {
     public static async apply(mutatedDocuments: Map<string, ReassigningDocument>): Promise<void> {
+        await this.applyList(Array.from(mutatedDocuments.values()));
+    }
+
+    public static async applyList(mutatedDocuments: ReassigningDocument[]): Promise<void> {
         if (! await this.confirmChanges(mutatedDocuments)) {
             Logger.info("Aborted applying");
             return;
@@ -16,9 +20,9 @@ export class ReassignerApplier {
         await this.inFactApply(mutatedDocuments);
     }
 
-    private static async inFactApply(mutatedDocuments: Map<string, ReassigningDocument>): Promise<void> {
+    private static async inFactApply(mutatedDocuments: ReassigningDocument[]): Promise<void> {
         const documentsToApply: ReassigningDocument[] = [];
-        mutatedDocuments.forEach((document, topic) => {
+        mutatedDocuments.forEach(document => {
             for (let partition of document.getPartitions()) {
                 if (partition.getChanged()) {
                     documentsToApply.push(document);
@@ -43,11 +47,11 @@ export class ReassignerApplier {
         Logger.debug(`Reassign output: \n${assignOutput}`);
     }
 
-    private static confirmChanges(mutatedDocuments: Map<string, ReassigningDocument>): Promise<boolean> {
+    private static confirmChanges(mutatedDocuments: ReassigningDocument[]): Promise<boolean> {
         Logger.info("Do you confirm that you want to apply the changes bellow: ?");
         Logger.info(`What will change specifically: `);
         let lastTopic = "";
-        for (let document of mutatedDocuments.values()) {
+        for (let document of mutatedDocuments) {
             document.getPartitions().forEach(partitionDocument => {
                 if (partitionDocument.getChanged()) {
                     if (lastTopic != partitionDocument.getTopic()) {

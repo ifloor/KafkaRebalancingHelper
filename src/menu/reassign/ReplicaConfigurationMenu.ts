@@ -78,7 +78,6 @@ export class ReplicaConfigurationMenu {
     }
 
     private typed(line: string): void {
-        console.log(`input lines: ${line}`);
         const pieces = line.split(" ");
         switch (pieces[0].toLowerCase().trim()) {
             case "1":
@@ -125,7 +124,7 @@ export class ReplicaConfigurationMenu {
 
     private option2(inputLinePieces: string[]) {
         if (inputLinePieces.length <= 1) {
-            console.log("Error: partition entry id not specified. Type: 2 {{partition_entry_id}}")
+            Logger.error("Error: partition entry id not specified. Type: 2 {{partition_entry_id}}")
             return;
         }
 

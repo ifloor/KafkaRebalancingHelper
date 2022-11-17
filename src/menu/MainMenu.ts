@@ -6,6 +6,7 @@ import {
 import {ShowingByBrokerPartitionsDetails} from "./byBroker/ShowingByBrokerPartitionsDetails";
 import {ReassignMenu} from "./reassign/ReassignMenu";
 import {ShowingCurrentConsumerGroups} from "./currentConsumerGroups/ShowingCurrentConsumerGroups";
+import {TopicReplicationFactorChangeMenu} from "./replication-live-change/TopicReplicationFactorChangeMenu";
 
 export class MainMenu {
 
@@ -30,7 +31,7 @@ export class MainMenu {
         console.log(`3) Show brokers with partitions`);
         console.log(`4) Move (reassign) partitions`);
         console.log(`5*) Change topic configs`);
-        console.log(`6*) Mutate existing topic replication factor`);
+        console.log(`6) Mutate existing topic replication factor`);
         console.log(`9) Exit`);
     }
 
@@ -52,6 +53,16 @@ export class MainMenu {
             case "4":
                 console.log("option 4");
                 ReassignMenu.run();
+                break;
+
+            case "5":
+                console.log("option 5 not yet implemented");
+                this.menuEntry();
+                break;
+
+            case "6":
+                console.log("option 6");
+                new TopicReplicationFactorChangeMenu().run();
                 break;
 
             case "9":
