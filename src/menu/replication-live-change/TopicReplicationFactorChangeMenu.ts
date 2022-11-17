@@ -199,7 +199,7 @@ export class TopicReplicationFactorChangeMenu {
                         break;
                     }
                 }
-                
+
                 if (! brokerAlreadyReplicating) {
                     const replicas = topicPartition.getReplicas()
                     replicas.push(Number.parseInt(brokerToTry));
