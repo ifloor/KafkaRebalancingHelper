@@ -62,7 +62,7 @@ export class ReassignerUtils {
             if (foundPartition != null) break;
 
             for (let partition of document.getPartitions()) {
-                if (partition.getReplicas().indexOf(fromID) >= 0 && partition.getReplicas().indexOf(toID) < 0) {
+                if (partition.getReplicas().includes(fromID) && ! partition.getReplicas().includes(toID)) {
                     foundPartition = partition;
                     break;
                 }
@@ -77,6 +77,7 @@ export class ReassignerUtils {
         const toID: number = Number.parseInt(toBrokerID);
         const replicas = partitionToMove.getReplicas();
         replicas[replicas.indexOf(fromID)] = toID;
+        partitionToMove.setChanged();
     }
 
     public static countTopicsToReassign(documents: Map<string, ReassigningDocument>): number {

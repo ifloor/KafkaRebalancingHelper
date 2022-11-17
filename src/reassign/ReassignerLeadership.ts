@@ -24,7 +24,7 @@ export class ReassignerLeadership {
 
     private static async checkBalancingLeadership(brokerIDToCheck: string, idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
         const idealLeadershipPartitions = idealNumbers.get(brokerIDToCheck);
-        if (! idealLeadershipPartitions) {
+        if (idealLeadershipPartitions === null || idealLeadershipPartitions === undefined) {
             Logger.error(`${brokerIDToCheck} has no ideal number...`);
             return;
         }
@@ -36,7 +36,7 @@ export class ReassignerLeadership {
             let otherBrokerToMoveTo: string | null = null;
             while (otherBrokerToMoveTo === null) {
                 const otherRandomBroker = this.randomlyChooseAndCutNextBroker(otherBrokerTries);
-                if (otherRandomBroker === null) {
+                if (otherRandomBroker === null || otherRandomBroker === undefined) {
                     Logger.error(`Impossible to find another broker to move the partition leadership to. Exiting...`);
                     process.exit(-1);
                 }

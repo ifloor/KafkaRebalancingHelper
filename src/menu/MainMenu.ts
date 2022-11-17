@@ -30,6 +30,7 @@ export class MainMenu {
         console.log(`3) Show brokers with partitions`);
         console.log(`4) Move (reassign) partitions`);
         console.log(`5*) Change topic configs`);
+        console.log(`6*) Mutate existing topic replication factor`);
         console.log(`9) Exit`);
     }
 

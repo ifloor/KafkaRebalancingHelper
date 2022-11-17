@@ -59,6 +59,7 @@ export class ExecDescribeAllPartition {
 
         return newTopic;
     }
+
     private static fillTopicInfo(piece: string, topic: KafkaTopic): void {
         const keyValuePieces = piece.split(":");
         if (keyValuePieces.length != 2) {

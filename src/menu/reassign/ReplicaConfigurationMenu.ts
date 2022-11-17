@@ -5,7 +5,6 @@ import {ExecDescribeAllPartition} from "../../executors/ExecDescribeAllPartition
 import {ReassigningDocument} from "../../reassign/model/ReassigningDocument";
 import {ReassignerUtils} from "../../reassign/ReassignerUtils";
 import {ReassignMenu} from "./ReassignMenu";
-import {Sleeping} from "../../utils/Sleeping";
 import {ReassignerApplier} from "../../reassign/applying/ReassignerApplier";
 
 export class ReplicaConfigurationMenu {
@@ -160,30 +159,7 @@ export class ReplicaConfigurationMenu {
         mappedDocument.set(this.selectedPartition?.getTopic() ?? "", document);
 
         await ReassignerApplier.apply(mappedDocument);
-        await Sleeping.sleep(10000);
         this.selectedPartition = null;
-        this.loadPartitions();
-        this.menuEntry();
-
-
-        // readline.question(`Replicas input: [${replicas}]. Do you confirm? y/n`, (input: string) => {
-        //     if (input.trim().toLowerCase() === "y") {
-        //         const _ = this.applyReplicas(replicas);
-        //     } else {
-        //         Logger.info(`Aborted`);
-        //         this.selectedPartition = null;
-        //         this.menuEntry();
-        //     }
-        // });
-    }
-
-    private async applyReplicas(replicas: number[]): Promise<void> {
-        const document = new ReassigningDocument();
-        this.selectedPartition?.setReplicas(replicas);
-        document.addReassigningPartition(this.selectedPartition!);
-
-
-        await Sleeping.sleep(10000);
         this.loadPartitions();
         this.menuEntry();
     }

@@ -3,24 +3,33 @@ import {Logger} from "../utils/Logger";
 import {ReassignerUtils} from "./ReassignerUtils";
 import {RandomUtils} from "../utils/RandomUtils";
 import {ReassigningPartition} from "./model/ReassigningPartition";
+import {KafkaTopic} from "../kafka/model/KafkaTopic";
 
 export class ReassignerReplicas {
+    public static async reassignReplicas(topics: KafkaTopic[], idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
+        for (let brokerToFix of idealNumbers.keys()) {
+            await this.checkBalancingReplicas(brokerToFix, idealNumbers, partitionDocuments);
+        }
+    }
+
     private static async checkBalancingReplicas(brokerIDToCheck: string, idealNumbers: Map<string, number>, partitionDocuments: Map<string, ReassigningDocument>): Promise<void> {
         const idealReplicas = idealNumbers.get(brokerIDToCheck);
-        if (! idealReplicas) {
+        if (idealReplicas === null || idealReplicas === undefined) {
             Logger.error(`${brokerIDToCheck} has no ideal number...`);
             return;
         }
 
         let brokerReplications = this.countPartitionsThatBrokerReplicates(brokerIDToCheck, partitionDocuments);
         while (brokerReplications > idealReplicas) { // Reduce this broker replications
+            Logger.debug(`Broker [${brokerIDToCheck}] has [${brokerReplications}] replicas, but the ideal number is: [${idealReplicas}]`);
             // move
             const otherBrokerTries = this.buildOtherBrokersTries(idealNumbers, brokerIDToCheck);
             let otherBrokerToMoveTo: string | null = null;
             let partitionToMove: ReassigningPartition | null = null;
             while (partitionToMove === null) {
                 const otherRandomBroker = this.randomlyChooseAndCutNextBroker(otherBrokerTries);
-                if (otherRandomBroker === null) {
+                if (otherRandomBroker === null || otherRandomBroker === undefined) {
+                    Logger.error(`otherRandomBroker: ${otherRandomBroker}`);
                     Logger.error(`Impossible to find another broker to move the partition replica to. Exiting...`);
                     process.exit(-1);
                 }
@@ -34,10 +43,19 @@ export class ReassignerReplicas {
                         otherBrokerToMoveTo = otherRandomBroker;
                     }
                 }
+
+                if (otherBrokerToMoveTo === null || otherBrokerToMoveTo === undefined) {
+                    Logger.debug(`other broker: ${otherRandomBroker} is not an option when moving my partition to it`);
+                }
             }
 
-            if (otherBrokerToMoveTo === null || partitionToMove === null) {
-                Logger.error(`Impossible to find another partition to move replica.`);
+            if (otherBrokerToMoveTo === undefined || otherBrokerToMoveTo === null) {
+                Logger.error(`Impossible to find another partition to move replica (otherBrokerToMoveTo).`);
+                process.exit(-1);
+            }
+
+            if (partitionToMove === undefined || partitionToMove === null) {
+                Logger.error(`Impossible to find another partition to move replica (partitionToMove).`);
                 process.exit(-1);
             }
 
@@ -52,7 +70,7 @@ export class ReassignerReplicas {
         let totalReplications = 0;
         partitionDocuments.forEach(partitionDocument => {
             partitionDocument.getPartitions().forEach((reassigningPartition, index) => {
-                if (reassigningPartition.getReplicas().indexOf(brokerAsNumber) >= 0) totalReplications += 1;
+                if (reassigningPartition.getReplicas().includes(brokerAsNumber)) totalReplications += 1;
             });
         });
 
@@ -71,10 +89,8 @@ export class ReassignerReplicas {
     }
 
     private static randomlyChooseAndCutNextBroker(otherBrokersTries: Set<string>): string | null {
-        let selectedIndex = -1;
-        for (let i = 0; i < 30; i++) {
-            selectedIndex = RandomUtils.getRandomInt(0, otherBrokersTries.size - 1);
-        }
+        let selectedIndex = RandomUtils.getRandomInt(0, otherBrokersTries.size - 1);
+        Logger.debug(`Selected index: ${selectedIndex} among other broker tries: ${otherBrokersTries.size}`);
 
         const otherRandomBroker =  Array.from(otherBrokersTries.values())[selectedIndex]; // the other random broker ;);
         otherBrokersTries.delete(otherRandomBroker);

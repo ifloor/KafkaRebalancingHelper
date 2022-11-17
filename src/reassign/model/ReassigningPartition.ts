@@ -62,4 +62,8 @@ export class ReassigningPartition {
     public getChanged(): boolean {
         return this.changed;
     }
+
+    public setChanged(): void {
+        this.changed =  true;
+    }
 }

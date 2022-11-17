@@ -75,7 +75,7 @@ export class ShowingByBrokerPartitionsDetails {
             });
         });
 
-        const report = ByBrokersReports.gen(topics);
+        const report = await ByBrokersReports.gen(topics);
         report.brokerReports.forEach(brokerInfo => {
             this.printBroker(brokerInfo);
             const partitionsOfBroker: KafkaPartition[] = mappedPartitions.get(brokerInfo.getId()) ?? [];
@@ -88,7 +88,7 @@ export class ShowingByBrokerPartitionsDetails {
 
     private static async calculateSimplifiedInfo() {
         const topics = await ExecDescribeAllPartition.exec();
-        const report = ByBrokersReports.gen(topics);
+        const report = await ByBrokersReports.gen(topics);
 
         console.log(`Total partitions: ${report.totalPartitions}`);
         let onlinePartitions = 0;

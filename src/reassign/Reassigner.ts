@@ -9,6 +9,7 @@ import {ReassignerUtils} from "./ReassignerUtils";
 import {ReassignerApplier} from "./applying/ReassignerApplier";
 import {ReassignerLeadership} from "./ReassignerLeadership";
 import {ByBrokersReports} from "../reports/ByBrokersReports";
+import {ReassignerReplicas} from "./ReassignerReplicas";
 
 export class Reassigner {
     public static async reassignEvenly() {
@@ -25,7 +26,7 @@ export class Reassigner {
     public static async reassignByWeight(brokerWeights: BrokerWeightSpecification[]) {
         Logger.debug(`Reassigning using weights: ${JSON.stringify(brokerWeights)}`);
         const topics: KafkaTopic[] = await ExecDescribeAllPartition.exec();
-        const brokerReports = ByBrokersReports.gen(topics);
+        const brokerReports = await ByBrokersReports.gen(topics);
         const partitionDocuments: Map<string, ReassigningDocument> = ReassignerUtils.mapExisting(topics);
         const totalPartitions = brokerReports.totalPartitions;
         let totalReplicas = 0;
@@ -34,7 +35,7 @@ export class Reassigner {
         const brokerReplicaMap: Map<string, number> = new Map<string, number>();
         brokerReports.brokerReports.forEach(brokerReport => {
             brokerLeaderMap.set(brokerReport.getId(), brokerReport.getShouldBeTheLeaderPartitionsCount());
-            brokerReplicaMap.set(brokerReport.getId(), brokerReport.getResponsibleForPartitionReplicasCount());
+            brokerReplicaMap.set(brokerReport.getId(), brokerReport.getResponsibleForPartitionReplicasCount()); //TODO remember the history
             totalReplicas += brokerReport.getResponsibleForPartitionReplicasCount();
         });
 
@@ -46,7 +47,7 @@ export class Reassigner {
         // Replicas
         const replicasIdealLeaderNumbers = AssignerDistributor.calculateIdealProportion(brokerWeights, totalReplicas);
         this.logProportionFound(replicasIdealLeaderNumbers, brokerReplicaMap, "replicas", "replica(s)");
-        console.log(`I should have replicas: ${totalReplicas}`);
+        await ReassignerReplicas.reassignReplicas(topics, replicasIdealLeaderNumbers, partitionDocuments);
 
         // count
         const topicsToReassign = ReassignerUtils.countTopicsToReassign(partitionDocuments);
